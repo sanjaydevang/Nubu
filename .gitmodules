@@ -1,0 +1,3 @@
+[submodule "nabu-ui"]
+	path = nabu-ui
+	url = https://github.com/sanjaydevang/nabu-ui.git
