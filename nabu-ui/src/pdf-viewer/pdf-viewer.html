@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NabuAI PDF Viewer</title>
+    <!-- PDF.js from local files -->
+    <script src="lib/pdf.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background-color: #282828;
+            border-bottom: 1px solid #3a3a3a;
+            flex-shrink: 0;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo {
+            width: 32px;
+            height: 32px;
+            background-color: #2563eb;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 16px;
+        }
+        
+        .app-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+        
+        .pdf-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 20px;
+        }
+        
+        .pdf-icon {
+            width: 20px;
+            height: 20px;
+            fill: #dc2626;
+        }
+        
+        .filename {
+            font-size: 15px;
+            color: #e0e0e0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 300px;
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            border: none;
+        }
+        
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+        
+        .btn-secondary {
+            background-color: #4a4a4a;
+            color: #e0e0e0;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a5a5a;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .pdf-toolbar {
+            background-color: #282828;
+            border-bottom: 1px solid #3a3a3a;
+            padding: 8px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-shrink: 0;
+        }
+        
+        .toolbar-left, .toolbar-center, .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .annotation-tools {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 8px;
+            background: #1a1a1a;
+            border-radius: 6px;
+            border: 1px solid #3a3a3a;
+        }
+        
+        .annotation-tool {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 4px;
+            background: transparent;
+            color: #e0e0e0;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .annotation-tool:hover {
+            background: #3a3a3a;
+        }
+        
+        .annotation-tool.active {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .annotation-tool:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .color-picker {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .color-option {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+        
+        .color-option.active {
+            border-color: #e0e0e0;
+            transform: scale(1.2);
+        }
+        
+        .annotation-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .annotation-layer.active {
+            pointer-events: all;
+        }
+        
+        .annotation-layer.select-mode {
+            pointer-events: none;
+        }
+        
+        .annotation-layer.select-mode .highlight-annotation,
+        .annotation-layer.select-mode .note-annotation,
+        .annotation-layer.select-mode .drawing-annotation {
+            pointer-events: none;
+        }
+        
+        .highlight-annotation {
+            position: absolute;
+            background: rgba(255, 255, 0, 0.3);
+            border-radius: 2px;
+            pointer-events: none;
+        }
+        
+        .note-annotation {
+            position: absolute;
+            background: #ffeb3b;
+            border: 1px solid #f57f17;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 12px;
+            color: #333;
+            cursor: pointer;
+            min-width: 20px;
+            min-height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .note-annotation:hover {
+            background: #fff176;
+        }
+        
+        .drawing-annotation {
+            position: absolute;
+            pointer-events: none;
+        }
+        
+        .note-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+        
+        .note-modal.show {
+            display: flex;
+        }
+        
+        .note-content {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 400px;
+            width: 90%;
+            color: #333;
+        }
+        
+        .note-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            resize: vertical;
+            outline: none;
+        }
+        
+        .note-textarea:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .toolbar-separator {
+            width: 1px;
+            height: 20px;
+            background: #3a3a3a;
+        }
+        
+        .page-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .page-info {
+            color: #e0e0e0;
+            font-size: 14px;
+            min-width: 100px;
+            text-align: center;
+        }
+        
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .zoom-level {
+            color: #e0e0e0;
+            font-size: 14px;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .pdf-viewer {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background-color: #2a2a2a;
+            overflow: auto;
+            padding: 20px;
+        }
+        
+        .pdf-canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .pdf-canvas {
+            max-width: 100%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            background: white;
+            border-radius: 4px;
+        }
+        
+        .loading, .error {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #e0e0e0;
+            font-size: 16px;
+            text-align: center;
+            padding: 20px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .loading svg, .error svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 15px;
+            fill: #2563eb;
+        }
+        
+        .error svg {
+            fill: #dc2626;
+        }
+        
+        .error p {
+            color: #b0b0b0;
+            margin-top: 10px;
+        }
+        
+        .error button {
+            margin-top: 20px;
+            background-color: #2563eb;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #3a3a3a;
+            border-top: 4px solid #2563eb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .save-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        
+        .save-modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            color: #1f2937;
+        }
+        
+        .modal-header {
+            padding: 24px 24px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
+        }
+        
+        .close-btn {
+            color: #9ca3af;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        
+        .close-btn:hover {
+            background: #f3f4f6;
+        }
+        
+        .modal-body {
+            padding: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .form-input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .form-display {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 14px;
+            color: #6b7280;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        
+        .modal-actions .btn {
+            flex: 1;
+            justify-content: center;
+        }
+        
+        .success-message {
+            text-align: center;
+            padding: 24px;
+        }
+        
+        .success-icon {
+            width: 64px;
+            height: 64px;
+            background: #dcfce7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        
+        .success-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+            margin: 0 0 8px;
+        }
+        
+        .success-text {
+            font-size: 14px;
+            color: #6b7280;
+            margin: 0 0 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">N</div>
+            <span class="app-name">NabuAI</span>
+            <div class="pdf-info">
+                <svg class="pdf-icon" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="filename" id="pdf-filename">Loading PDF...</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <button id="open-original" class="btn btn-secondary">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                </svg>
+                Open Original
+            </button>
+            <button id="save-to-nabuai" class="btn btn-primary">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                </svg>
+                Save to NabuAI
+            </button>
+        </div>
+    </div>
+    
+    <div class="pdf-toolbar">
+        <div class="toolbar-left">
+            <div class="toolbar-group">
+                <button id="prev-page" class="btn btn-secondary" disabled>
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Previous
+                </button>
+                <span id="page-info" class="page-info">Page 1 of 1</span>
+                <button id="next-page" class="btn btn-secondary" disabled>
+                    Next
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <div class="toolbar-center">
+            <div class="annotation-tools">
+                <button id="select-tool" class="annotation-tool active" title="Select Tool">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
+                    </svg>
+                    Select
+                </button>
+                <button id="highlight-tool" class="annotation-tool" title="Highlight Text">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>
+                    </svg>
+                    Highlight
+                </button>
+                <button id="note-tool" class="annotation-tool" title="Add Note">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                    Note
+                </button>
+                <button id="draw-tool" class="annotation-tool" title="Draw">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                    </svg>
+                    Draw
+                </button>
+                <button id="eraser-tool" class="annotation-tool" title="Eraser">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    Eraser
+                </button>
+            </div>
+            
+            <div class="color-picker">
+                <div class="color-option active" data-color="yellow" style="background: #ffeb3b;" title="Yellow"></div>
+                <div class="color-option" data-color="green" style="background: #4caf50;" title="Green"></div>
+                <div class="color-option" data-color="blue" style="background: #2196f3;" title="Blue"></div>
+                <div class="color-option" data-color="red" style="background: #f44336;" title="Red"></div>
+                <div class="color-option" data-color="orange" style="background: #ff9800;" title="Orange"></div>
+            </div>
+        </div>
+        
+        <div class="toolbar-right">
+            <div class="toolbar-group">
+                <button id="zoom-out" class="btn btn-secondary">−</button>
+                <span id="zoom-level" class="zoom-level">100%</span>
+                <button id="zoom-in" class="btn btn-secondary">+</button>
+            </div>
+            <div class="toolbar-separator"></div>
+            <button id="save-annotations" class="btn btn-primary" title="Save Annotations to NabuAI">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                </svg>
+                Save Annotations
+            </button>
+        </div>
+    </div>
+    
+    <div class="pdf-viewer">
+        <div id="pdf-container" style="display: none;">
+            <div class="pdf-canvas-container" id="pdf-canvas-container">
+                <!-- PDF pages will be rendered here -->
+            </div>
+            <div class="annotation-layer" id="annotation-layer">
+                <!-- Annotations will be rendered here -->
+            </div>
+        </div>
+        
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            Loading PDF...
+        </div>
+        
+        <div id="error" class="error" style="display: none;">
+            <svg viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+            </svg>
+            <h3>Failed to Load PDF</h3>
+            <p>There was an issue displaying the PDF. Please try again or open the original document.</p>
+            <button onclick="window.location.reload()">Reload</button>
+        </div>
+    </div>
+    
+    <!-- Save Modal -->
+    <div class="save-modal" id="save-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Save PDF to NabuAI</h3>
+                <button class="close-btn" id="close-modal">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <div class="form-group">
+                    <label class="form-label">PDF File</label>
+                    <div class="form-display" id="pdf-file-display"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">PDF URL</label>
+                    <div class="form-display" id="pdf-url-display"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Source Page</label>
+                    <div class="form-display" id="source-page-display"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="pdf-title">Title</label>
+                    <input type="text" id="pdf-title" class="form-input" placeholder="Enter a title for this PDF...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="pdf-tags">Tags</label>
+                    <input type="text" id="pdf-tags" class="form-input" placeholder="Enter tags separated by commas...">
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-primary" id="save-pdf-btn">Save PDF</button>
+                    <button class="btn btn-secondary" id="cancel-save">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Note Modal -->
+    <div class="note-modal" id="note-modal">
+        <div class="note-content">
+            <h3 style="margin: 0 0 16px; color: #111827;">Add Note</h3>
+            <textarea id="note-text" class="note-textarea" placeholder="Enter your note here..."></textarea>
+            <div style="display: flex; gap: 12px; margin-top: 16px;">
+                <button id="save-note" class="btn btn-primary" style="flex: 1;">Save Note</button>
+                <button id="cancel-note" class="btn btn-secondary" style="flex: 1;">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module" src="pdf-viewer.js"></script>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NabuAI Extension Demo Page</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .demo-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+        .demo-section h2 {
+            color: #1f2937;
+            margin-top: 0;
+        }
+        .demo-section p {
+            color: #4b5563;
+        }
+        .highlight {
+            background: #fef3c7;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #f59e0b;
+        }
+        .image-demo {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .image-demo img {
+            max-width: 300px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .video-demo {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .video-demo video {
+            max-width: 300px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .instructions {
+            background: #dbeafe;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #3b82f6;
+            margin: 20px 0;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #1e40af;
+        }
+        .instructions ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧠 NabuAI Extension Demo Page</h1>
+    
+    <div class="instructions">
+        <h3>📋 How to Test the Extension</h3>
+        <ol>
+            <li>Make sure the NabuAI extension is loaded in Chrome</li>
+            <li>Try the different features below</li>
+            <li>Check the browser console for any errors</li>
+            <li>Use Chrome DevTools to inspect the extension</li>
+        </ol>
+    </div>
+
+    <div class="demo-section">
+        <h2>🎯 Text Selection Demo</h2>
+        <p>Select any text in this paragraph to test the context menu functionality. You should be able to right-click on selected text and see a "Save to NabuAI" option. This demonstrates how the extension can capture and save specific pieces of text content from web pages.</p>
+        
+        <div class="highlight">
+            <strong>Try this:</strong> Select this highlighted text, right-click, and choose "Save to NabuAI" from the context menu. You should see a modal dialog appear where you can add tags and save the content.
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>🖼️ Image Save Demo</h2>
+        <p>Right-click on the image below to test saving images to NabuAI. The extension should detect the right-click and show a context menu option to save the image.</p>
+        
+        <div class="image-demo">
+            <img src="https://picsum.photos/300/200?random=1" alt="Random demo image" title="Right-click to save this image">
+        </div>
+        
+        <p><em>Note: This is a placeholder image from Picsum. In a real scenario, you'd be saving actual images from web pages.</em></p>
+    </div>
+
+    <div class="demo-section">
+        <h2>🎥 Video Save Demo</h2>
+        <p>Right-click on the video below to test saving videos to NabuAI. The extension should provide a context menu option to save the video content.</p>
+        
+        <div class="video-demo">
+            <video width="300" height="200" controls>
+                <source src="https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        
+        <p><em>Note: This is a sample video. In real usage, you'd be saving videos from various web pages.</em></p>
+    </div>
+
+    <div class="demo-section">
+        <h2>📸 Screenshot Demo</h2>
+        <p>Right-click anywhere on this page (not on text, images, or videos) to test the screenshot functionality. You'll see two options in the context menu:</p>
+        
+        <ul>
+            <li><strong>"Take Full Screenshot with NabuAI"</strong> - Captures the entire visible page</li>
+            <li><strong>"Select Area to Screenshot with NabuAI"</strong> - Allows you to select a specific area to capture</li>
+        </ul>
+        
+        <div class="highlight">
+            <strong>To test full screenshot:</strong> Right-click on an empty area and select "Take Full Screenshot with NabuAI" to capture the entire visible area.
+        </div>
+        
+        <div class="highlight">
+            <strong>To test partial screenshot:</strong> Right-click on an empty area and select "Select Area to Screenshot with NabuAI". Then click and drag to select the area you want to capture, and press Enter to save or Escape to cancel.
+        </div>
+        
+        <p><em>Note: The partial screenshot feature includes a selection overlay with visual feedback and keyboard controls.</em></p>
+    </div>
+
+    <div class="demo-section">
+        <h2>📄 PDF Viewer Demo</h2>
+        <p>Right-click on the PDF link below to test the NabuAI PDF viewer. The extension will open the PDF in a custom viewer with a "Save to NabuAI" button in the toolbar.</p>
+        
+        <div class="highlight">
+            <strong>To test:</strong> Right-click on the PDF link below and select "Open PDF in NabuAI Viewer" from the context menu. This will open the PDF in a custom viewer with NabuAI branding and save functionality.
+        </div>
+        
+        <p><a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" target="_blank" style="color: #2563eb; text-decoration: underline;">📄 Sample PDF Document</a></p>
+        
+        <p><em>Note: The PDF viewer includes a toolbar with NabuAI branding, "Save to NabuAI" button, and "Open Original" button for accessing the original PDF link.</em></p>
+    </div>
+
+    <div class="demo-section">
+        <h2>🚀 Extension Popup Demo</h2>
+        <p>Click on the NabuAI extension icon in your Chrome toolbar to test the popup functionality. The popup should display information about this current page and allow you to save it with notes and tags.</p>
+        
+        <div class="highlight">
+            <strong>To test:</strong> Look for the NabuAI extension icon in your Chrome toolbar (usually in the top-right corner), click on it, and you should see a popup with this page's information.
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>📝 Content for Testing</h2>
+        <p>Here's some additional content you can select and save to test the text selection feature:</p>
+        
+        <ul>
+            <li><strong>Technical Information:</strong> This extension is built with Vue 3, TypeScript, and Tailwind CSS, using Vite as the build tool.</li>
+            <li><strong>Features:</strong> Text selection, image saving, video saving, screenshot capture, PDF viewer with save functionality, page saving, and context menu integration.</li>
+            <li><strong>Architecture:</strong> Content scripts, background service worker, popup interface, and context menu handlers.</li>
+            <li><strong>Storage:</strong> Currently uses Chrome's local storage for demonstration purposes.</li>
+        </ul>
+        
+        <p>Feel free to select any of this text and test the save functionality!</p>
+    </div>
+
+    <div class="demo-section">
+        <h2>🔧 Troubleshooting</h2>
+        <p>If you encounter issues:</p>
+        <ul>
+            <li>Check that the extension is properly loaded in <code>chrome://extensions/</code></li>
+            <li>Ensure Developer mode is enabled</li>
+            <li>Try reloading the extension</li>
+            <li>Check the browser console for error messages</li>
+            <li>Verify that the extension has the necessary permissions</li>
+        </ul>
+    </div>
+
+    <div class="demo-section">
+        <h2>📚 Next Steps</h2>
+        <p>Once you've tested the basic functionality:</p>
+        <ul>
+            <li>Try the extension on other websites</li>
+            <li>Test with different types of content</li>
+            <li>Explore the saved content in Chrome's local storage</li>
+            <li>Consider integrating with a backend service</li>
+            <li>Add more advanced features like search and categorization</li>
+        </ul>
+    </div>
+
+    <footer style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #e5e7eb; color: #6b7280;">
+        <p>NabuAI Extension Demo Page - Built with ❤️ using Vue 3, TypeScript, and Tailwind CSS</p>
+    </footer>
+</body>
+</html>
